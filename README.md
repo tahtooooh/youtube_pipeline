@@ -5,6 +5,7 @@ Projet de Taha Hajji, Bouaicha Ibrahim et Ayoub Chenguir. Cette livraison couvre
 Les comptes rendus sont rédigés en LaTeX dans `docs/rapport_semaine_1.tex` et `docs/rapport_semaine_2.tex`. Avec MiKTeX ou TeX Live, les compiler ainsi :
 
 ```powershell
+New-Item -ItemType Directory -Force output/pdf | Out-Null
 pdflatex -interaction=nonstopmode -halt-on-error -output-directory=output/pdf docs/rapport_semaine_1.tex
 pdflatex -interaction=nonstopmode -halt-on-error -output-directory=output/pdf docs/rapport_semaine_2.tex
 ```
