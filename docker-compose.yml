@@ -1,0 +1,97 @@
+services:
+  kafka:
+    image: apache/kafka:3.8.1
+    hostname: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    ports: ["127.0.0.1:9092:9092"]
+    volumes: ["kafka_data:/var/lib/kafka/data"]
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    hostname: namenode
+    environment:
+      CLUSTER_NAME: youtube-batch
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      HDFS_CONF_dfs_replication: 2
+      HDFS_CONF_dfs_permissions_enabled: "false"
+      HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+    ports: ["127.0.0.1:9870:9870"]
+    volumes:
+      - namenode_data:/hadoop/dfs/name
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    depends_on: [namenode]
+    environment:
+      SERVICE_PRECONDITION: namenode:9870
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      HDFS_CONF_dfs_replication: 2
+      HDFS_CONF_dfs_permissions_enabled: "false"
+      HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+    volumes:
+      - datanode1_data:/hadoop/dfs/data
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    depends_on: [namenode]
+    environment:
+      SERVICE_PRECONDITION: namenode:9870
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      HDFS_CONF_dfs_replication: 2
+      HDFS_CONF_dfs_permissions_enabled: "false"
+      HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+    volumes:
+      - datanode2_data:/hadoop/dfs/data
+
+  spark-master:
+    image: apache/spark:3.5.3
+    user: root
+    entrypoint: ["/bin/bash", "-lc"]
+    command: ["/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master"]
+    environment:
+      HADOOP_CONF_DIR: /opt/spark/conf/hadoop
+      SPARK_MASTER_HOST: spark-master
+    ports: ["127.0.0.1:8080:8080", "127.0.0.1:7077:7077"]
+    volumes: &spark_volumes
+      - ./batch:/opt/project/batch:ro
+      - ./infra/hadoop:/opt/spark/conf/hadoop:ro
+
+  spark-worker-1:
+    image: apache/spark:3.5.3
+    user: root
+    entrypoint: ["/bin/bash", "-lc"]
+    command: ["/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --cores 1 --memory 512m spark://spark-master:7077"]
+    depends_on: [spark-master]
+    environment:
+      HADOOP_CONF_DIR: /opt/spark/conf/hadoop
+    volumes: *spark_volumes
+
+  spark-worker-2:
+    image: apache/spark:3.5.3
+    user: root
+    entrypoint: ["/bin/bash", "-lc"]
+    command: ["/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --cores 1 --memory 512m spark://spark-master:7077"]
+    depends_on: [spark-master]
+    environment:
+      HADOOP_CONF_DIR: /opt/spark/conf/hadoop
+    volumes: *spark_volumes
+
+volumes:
+  kafka_data:
+  namenode_data:
+  datanode1_data:
+  datanode2_data:

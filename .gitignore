@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+__pycache__/
+.pytest_cache/
+.venv/
+data/*.jsonl
+!data/demo_videos.jsonl
+output/
+tmp/
+Fiche_Projet_Pipeline_Big_Data_Version 2026.pdf
+tools/merge_video_batches.py
