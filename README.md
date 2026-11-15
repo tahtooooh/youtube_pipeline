@@ -1,6 +1,6 @@
 # Pipeline batch YouTube Data API - Big Data
 
-Projet de Taha Hajji, Bouaicha Ibrahim et Ayoub Chenguir. Cette livraison couvre les jalons des semaines 1 et 2 de la fiche de projet. Elle prépare la voie froide ; le modèle ML et l'inférence temps réel sont des étapes ultérieures.
+Projet de Taha Hajji, Bouaicha Ibrahim, Ayoub Chenguir et Jdidi soulaimane. Cette livraison couvre les jalons des semaines 1 et 2 de la fiche de projet. Elle prépare la voie froide ; le modèle ML et l'inférence temps réel sont des étapes ultérieures.
 
 Les comptes rendus sont rédigés en LaTeX dans `docs/rapport_semaine_1.tex` et `docs/rapport_semaine_2.tex`. Avec MiKTeX ou TeX Live, les compiler ainsi :
 
